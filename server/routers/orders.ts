@@ -20,6 +20,7 @@ export const ordersRouter = router({
         product: z.string().min(1),
         volume: z.string(),
         revenue: z.string(),
+        targetUserId: z.number().optional(), // Admin can register order for another operator
         customValues: z.array(
           z.object({
             fieldId: z.number(),
@@ -30,8 +31,14 @@ export const ordersRouter = router({
     )
     .mutation(async ({ ctx, input }) => {
       try {
+        // If admin is registering for another operator, use targetUserId
+        // Otherwise use the logged-in user's ID
+        const orderUserId = (ctx.user.role === "admin" && input.targetUserId)
+          ? input.targetUserId
+          : ctx.user.id;
+
         const result = await createOrder({
-          userId: ctx.user.id,
+          userId: orderUserId,
           clientCode: input.clientCode,
           product: input.product,
           volume: input.volume,
@@ -93,7 +100,7 @@ export const ordersRouter = router({
     }
 
     try {
-      const allOrders = await getAllOrders();
+      const allOrders = await getAllOrdersWithUserNames();
       
       const enrichedOrders = await Promise.all(
         allOrders.map(async (order) => {

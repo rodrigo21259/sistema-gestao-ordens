@@ -96,22 +96,27 @@ export const rankingRouter = router({
             ? new Decimal(orderCountMetric.weight)
             : new Decimal(40);
 
-          // Normalize metrics (0-100 scale)
-          const maxRevenue = orders.length > 0
-            ? orders.reduce(
-                (max, order) =>
-                  new Decimal(order.revenue).greaterThan(max)
-                    ? new Decimal(order.revenue)
-                    : max,
-                new Decimal(0)
-              )
-            : new Decimal(1);
+          // Calculate max values across all operators for normalization
+          const operatorTotals = operators.map((op) => {
+            const opOrders = orders.filter((o) => o.userId === op.id);
+            const opRevenue = opOrders.reduce(
+              (sum, order) => sum.plus(new Decimal(order.revenue)),
+              new Decimal(0)
+            );
+            return { userId: op.id, revenue: opRevenue, orderCount: opOrders.length };
+          });
+
+          const maxRevenue = operatorTotals.reduce(
+            (max, op) => (op.revenue.greaterThan(max) ? op.revenue : max),
+            new Decimal(1)
+          );
 
           const maxOrderCount = Math.max(
-            ...users.map((u) => orders.filter((o) => o.userId === u.id).length),
+            ...operatorTotals.map((op) => op.orderCount),
             1
           );
 
+          // Normalize metrics (0-100 scale)
           const normalizedRevenue = maxRevenue.greaterThan(0)
             ? totalRevenue.dividedBy(maxRevenue).times(100)
             : new Decimal(0);

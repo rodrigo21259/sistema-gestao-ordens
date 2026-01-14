@@ -87,6 +87,7 @@ export default function OrderForm() {
       await createOrderMutation.mutateAsync({
         ...formData,
         customValues: customValuesArray,
+        targetUserId: selectedUserId ? parseInt(selectedUserId) : undefined,
       });
 
       toast.success("Ordem registrada com sucesso!");
