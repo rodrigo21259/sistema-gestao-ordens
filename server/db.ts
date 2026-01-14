@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
+import { InsertUser, users, orders, customFields, orderCustomValues, rankingMetrics, InsertOrder, InsertCustomField, InsertOrderCustomValue } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -89,4 +89,130 @@ export async function getUserByOpenId(openId: string) {
   return result.length > 0 ? result[0] : undefined;
 }
 
-// TODO: add feature queries here as your schema grows.
+// Orders queries
+export async function createOrder(data: InsertOrder) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(orders).values(data);
+  return result;
+}
+
+export async function getOrdersByUserId(userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.select().from(orders).where(eq(orders.userId, userId));
+}
+
+export async function getAllOrders() {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.select().from(orders);
+}
+
+export async function deleteOrder(orderId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.delete(orders).where(eq(orders.id, orderId));
+}
+
+// Custom fields queries
+export async function createCustomField(data: InsertCustomField) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(customFields).values(data);
+  return result;
+}
+
+export async function getActiveCustomFields() {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.select().from(customFields).where(eq(customFields.isActive, true));
+}
+
+export async function getAllCustomFields() {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.select().from(customFields);
+}
+
+export async function updateCustomField(fieldId: number, data: Partial<InsertCustomField>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.update(customFields).set(data).where(eq(customFields.id, fieldId));
+}
+
+export async function deleteCustomField(fieldId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.delete(customFields).where(eq(customFields.id, fieldId));
+}
+
+// Order custom values queries
+export async function createOrderCustomValue(data: InsertOrderCustomValue) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.insert(orderCustomValues).values(data);
+}
+
+export async function getOrderCustomValues(orderId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.select().from(orderCustomValues).where(eq(orderCustomValues.orderId, orderId));
+}
+
+export async function deleteOrderCustomValues(orderId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.delete(orderCustomValues).where(eq(orderCustomValues.orderId, orderId));
+}
+
+// Ranking metrics queries
+export async function getRankingMetrics() {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.select().from(rankingMetrics);
+}
+
+export async function getActiveRankingMetrics() {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.select().from(rankingMetrics).where(eq(rankingMetrics.isActive, true));
+}
+
+export async function updateRankingMetric(metricId: number, weight: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.update(rankingMetrics).set({ weight }).where(eq(rankingMetrics.id, metricId));
+}
+
+export async function initializeRankingMetrics() {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const existing = await db.select().from(rankingMetrics);
+  if (existing.length === 0) {
+    await db.insert(rankingMetrics).values([
+      { metricName: "revenue", weight: "60.00", isActive: true },
+      { metricName: "orderCount", weight: "40.00", isActive: true },
+    ]);
+  }
+}
+
+// User queries
+export async function getAllUsers() {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.select().from(users);
+}
+
+export async function updateUserRole(userId: number, role: "user" | "admin") {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.update(users).set({ role }).where(eq(users.id, userId));
+}
+
+export async function updateUserTheme(userId: number, theme: "light" | "dark") {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.update(users).set({ themePreference: theme }).where(eq(users.id, userId));
+}
