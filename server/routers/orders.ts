@@ -4,6 +4,7 @@ import {
   createOrder,
   getOrdersByUserId,
   getAllOrders,
+  getAllOrdersWithUserNames,
   deleteOrder,
   getOrderCustomValues,
   createOrderCustomValue,
@@ -130,7 +131,7 @@ export const ordersRouter = router({
           });
         }
 
-        const allOrders = await getAllOrders();
+        const allOrders = await getAllOrdersWithUserNames();
         
         let filteredOrders = allOrders;
         if (input.month !== undefined && input.year !== undefined) {
@@ -144,7 +145,7 @@ export const ordersRouter = router({
         }
 
         const enrichedOrders = await Promise.all(
-          filteredOrders.map(async (order) => {
+          filteredOrders.map(async (order: any) => {
             const customValues = await getOrderCustomValues(order.id);
             return {
               ...order,
@@ -155,7 +156,7 @@ export const ordersRouter = router({
 
         const headers = [
           "ID",
-          "Operador",
+          "Nome do Operador",
           "Cliente",
           "Produto",
           "Volume",
@@ -163,9 +164,9 @@ export const ordersRouter = router({
           "Data",
         ];
 
-        const rows = enrichedOrders.map((order) => [
+        const rows = enrichedOrders.map((order: any) => [
           order.id,
-          order.userId,
+          order.userName,
           order.clientCode,
           order.product,
           order.volume,

@@ -77,3 +77,10 @@
 - [x] Garantir que data de registro é salva automaticamente
 - [x] Adicionar formulário para admin criar novos operadores
 - [x] Testar todas as funcionalidades
+
+
+## Fase 11: Melhorias Visuais e Refinamentos
+- [x] Adicionar nome do operador na exportação CSV
+- [x] Ajustar tema escuro para cinza claro (não preto puro)
+- [x] Melhorar design visual geral
+- [x] Testar funcionalidades

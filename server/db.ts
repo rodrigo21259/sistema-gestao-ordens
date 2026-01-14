@@ -109,6 +109,24 @@ export async function getAllOrders() {
   return await db.select().from(orders);
 }
 
+export async function getAllOrdersWithUserNames() {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const allOrders = await db.select().from(orders);
+  
+  const ordersWithNames = await Promise.all(
+    allOrders.map(async (order) => {
+      const user = await db.select().from(users).where(eq(users.id, order.userId)).limit(1);
+      return {
+        ...order,
+        userName: user[0]?.name || "Desconhecido",
+      };
+    })
+  );
+  
+  return ordersWithNames;
+}
+
 export async function deleteOrder(orderId: number) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
