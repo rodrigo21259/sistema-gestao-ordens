@@ -148,11 +148,6 @@ export default function AdminDashboard() {
       return;
     }
 
-    if (!newOperatorEmail.toLowerCase().endsWith("@investsmart.com.br")) {
-      toast.error("O email deve ser da empresa Investsmart (@investsmart.com.br)");
-      return;
-    }
-
     try {
       await createOperatorMutation.mutateAsync({
         email: newOperatorEmail,
@@ -225,7 +220,7 @@ export default function AdminDashboard() {
                         onChange={(e) => handleEmailChange(e.target.value)}
                         className="mt-1"
                       />
-                      <p className="text-xs text-muted-foreground mt-1">Deve ser um email @investsmart.com.br. O nome será extraído automaticamente</p>
+                      <p className="text-xs text-muted-foreground mt-1">O nome será extraído automaticamente do email</p>
                     </div>
                     <div>
                       <Label htmlFor="name">Nome (Automático) *</Label>

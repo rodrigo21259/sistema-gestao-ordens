@@ -230,13 +230,13 @@ export default function OrderForm() {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="volume">Volume (R$) *</Label>
+                    <Label htmlFor="volume">Volume *</Label>
                     <Input
                       id="volume"
                       name="volume"
                       type="number"
-                      step="0.01"
-                      placeholder="Ex: 1500.00"
+                      step="0.0001"
+                      placeholder="Ex: 100.5"
                       value={formData.volume}
                       onChange={handleInputChange}
                       required
