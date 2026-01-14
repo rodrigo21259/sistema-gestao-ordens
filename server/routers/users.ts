@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc";
-import { getAllUsers, updateUserRole, updateUserTheme } from "../db";
+import { getAllUsers, updateUserRole, updateUserTheme, upsertUser } from "../db";
 import { TRPCError } from "@trpc/server";
 
 const adminProcedure = protectedProcedure.use(async ({ ctx, next }) => {
@@ -33,6 +33,38 @@ export const usersRouter = router({
       });
     }
   }),
+
+  createOperator: adminProcedure
+    .input(
+      z.object({
+        name: z.string().min(1),
+        email: z.string().email(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      try {
+        const generatedOpenId = `operator-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        
+        await upsertUser({
+          openId: generatedOpenId,
+          name: input.name,
+          email: input.email,
+          loginMethod: "admin-created",
+          role: "user",
+        });
+
+        return {
+          success: true,
+          message: `Operador ${input.name} criado com sucesso. Ele poderá fazer login com seu email.`,
+        };
+      } catch (error) {
+        console.error("Error creating operator:", error);
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to create operator",
+        });
+      }
+    }),
 
   promoteToAdmin: adminProcedure
     .input(z.object({ userId: z.number() }))

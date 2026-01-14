@@ -9,13 +9,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Loader2, Plus, Trash2, Users, Sliders, Grid3x3 } from "lucide-react";
+import { Loader2, Plus, Trash2, Users, Sliders, Grid3x3, Download, UserPlus } from "lucide-react";
+import OrdersExport from "./OrdersExport";
 
 export default function AdminDashboard() {
   const { user } = useAuth();
   const [newFieldName, setNewFieldName] = useState("");
   const [newFieldType, setNewFieldType] = useState<"TEXT" | "NUMBER" | "BOOLEAN" | "DROPDOWN">("TEXT");
   const [newFieldOptions, setNewFieldOptions] = useState("");
+  const [newOperatorName, setNewOperatorName] = useState("");
+  const [newOperatorEmail, setNewOperatorEmail] = useState("");
 
   // Queries
   const { data: users, refetch: refetchUsers } = trpc.users.listAll.useQuery();
@@ -28,6 +31,7 @@ export default function AdminDashboard() {
   const updateMetricMutation = trpc.ranking.updateMetricWeight.useMutation();
   const promoteUserMutation = trpc.users.promoteToAdmin.useMutation();
   const demoteUserMutation = trpc.users.demoteToOperator.useMutation();
+  const createOperatorMutation = trpc.users.createOperator.useMutation();
 
   if (user?.role !== "admin") {
     return (
@@ -115,15 +119,37 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleCreateOperator = async () => {
+    if (!newOperatorName.trim() || !newOperatorEmail.trim()) {
+      toast.error("Nome e email são obrigatórios");
+      return;
+    }
+
+    try {
+      await createOperatorMutation.mutateAsync({
+        name: newOperatorName,
+        email: newOperatorEmail,
+      });
+
+      toast.success("Operador criado com sucesso!");
+      setNewOperatorName("");
+      setNewOperatorEmail("");
+      refetchUsers();
+    } catch (error) {
+      toast.error("Erro ao criar operador");
+      console.error(error);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="bg-gradient-to-r from-primary/10 to-accent/10 p-6 rounded-lg border border-primary/20">
         <h1 className="text-3xl font-bold text-primary mb-2">Painel Administrativo</h1>
-        <p className="text-muted-foreground">Gerencie usuários, campos dinâmicos e métricas de ranking</p>
+        <p className="text-muted-foreground">Gerencie usuários, campos dinâmicos, métricas e exporte dados</p>
       </div>
 
       <Tabs defaultValue="users" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 bg-muted p-1">
+        <TabsList className="grid w-full grid-cols-4 bg-muted p-1">
           <TabsTrigger value="users" className="gap-2">
             <Users className="h-4 w-4" />
             <span className="hidden sm:inline">Usuários</span>
@@ -136,6 +162,10 @@ export default function AdminDashboard() {
             <Sliders className="h-4 w-4" />
             <span className="hidden sm:inline">Métricas</span>
           </TabsTrigger>
+          <TabsTrigger value="export" className="gap-2">
+            <Download className="h-4 w-4" />
+            <span className="hidden sm:inline">Exportar</span>
+          </TabsTrigger>
         </TabsList>
 
         {/* Usuários */}
@@ -146,9 +176,55 @@ export default function AdminDashboard() {
                 <Users className="h-5 w-5 text-primary" />
                 Gerenciamento de Usuários
               </CardTitle>
-              <CardDescription>Visualize e gerencie os usuários do sistema</CardDescription>
+              <CardDescription>Visualize, crie e gerencie os usuários do sistema</CardDescription>
             </CardHeader>
-            <CardContent className="pt-6">
+            <CardContent className="pt-6 space-y-6">
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button className="w-full">
+                    <UserPlus className="mr-2 h-4 w-4" />
+                    Criar Novo Operador
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Criar Novo Operador</DialogTitle>
+                    <DialogDescription>Adicione um novo operador ao sistema</DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="operatorName">Nome</Label>
+                      <Input
+                        id="operatorName"
+                        placeholder="Ex: João Silva"
+                        value={newOperatorName}
+                        onChange={(e) => setNewOperatorName(e.target.value)}
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="operatorEmail">Email</Label>
+                      <Input
+                        id="operatorEmail"
+                        type="email"
+                        placeholder="Ex: joao@example.com"
+                        value={newOperatorEmail}
+                        onChange={(e) => setNewOperatorEmail(e.target.value)}
+                        className="mt-1"
+                      />
+                    </div>
+                    <Button
+                      onClick={handleCreateOperator}
+                      disabled={createOperatorMutation.isPending}
+                      className="w-full"
+                    >
+                      {createOperatorMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      Criar Operador
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+
               {!users ? (
                 <div className="flex justify-center py-8">
                   <Loader2 className="h-6 w-6 animate-spin text-primary" />
@@ -353,6 +429,11 @@ export default function AdminDashboard() {
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* Exportar Ordens */}
+        <TabsContent value="export">
+          <OrdersExport />
         </TabsContent>
       </Tabs>
     </div>

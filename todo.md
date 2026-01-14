@@ -69,3 +69,11 @@
 - [x] Adicionar informações sobre propriedade e controle de logins
 - [x] Melhorar layout e espaçamento visual
 - [x] Adicionar ícones e elementos visuais mais atraentes
+
+
+## Fase 10: Funcionalidades Solicitadas - Segunda Rodada
+- [x] Adicionar menu/página para extração de todas as ordens em CSV
+- [x] Implementar filtro de ranking por mês/ano
+- [x] Garantir que data de registro é salva automaticamente
+- [x] Adicionar formulário para admin criar novos operadores
+- [x] Testar todas as funcionalidades

@@ -39,7 +39,6 @@ export const ordersRouter = router({
 
         const orderId = (result as any).insertId;
 
-        // Create custom field values
         if (input.customValues && input.customValues.length > 0) {
           for (const customValue of input.customValues) {
             await createOrderCustomValue({
@@ -64,7 +63,6 @@ export const ordersRouter = router({
     try {
       const userOrders = await getOrdersByUserId(ctx.user.id);
       
-      // Enrich orders with custom values
       const enrichedOrders = await Promise.all(
         userOrders.map(async (order) => {
           const customValues = await getOrderCustomValues(order.id);
@@ -86,7 +84,6 @@ export const ordersRouter = router({
   }),
 
   listAll: protectedProcedure.query(async ({ ctx }) => {
-    // Only admins can list all orders
     if (ctx.user.role !== "admin") {
       throw new TRPCError({
         code: "FORBIDDEN",
@@ -97,7 +94,6 @@ export const ordersRouter = router({
     try {
       const allOrders = await getAllOrders();
       
-      // Enrich orders with custom values
       const enrichedOrders = await Promise.all(
         allOrders.map(async (order) => {
           const customValues = await getOrderCustomValues(order.id);
@@ -118,11 +114,88 @@ export const ordersRouter = router({
     }
   }),
 
+  exportCSV: protectedProcedure
+    .input(
+      z.object({
+        month: z.number().optional(),
+        year: z.number().optional(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      try {
+        if (ctx.user.role !== "admin") {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "Only admins can export orders",
+          });
+        }
+
+        const allOrders = await getAllOrders();
+        
+        let filteredOrders = allOrders;
+        if (input.month !== undefined && input.year !== undefined) {
+          filteredOrders = allOrders.filter((order) => {
+            const orderDate = new Date(order.createdAt);
+            return (
+              orderDate.getMonth() === input.month &&
+              orderDate.getFullYear() === input.year
+            );
+          });
+        }
+
+        const enrichedOrders = await Promise.all(
+          filteredOrders.map(async (order) => {
+            const customValues = await getOrderCustomValues(order.id);
+            return {
+              ...order,
+              customValues,
+            };
+          })
+        );
+
+        const headers = [
+          "ID",
+          "Operador",
+          "Cliente",
+          "Produto",
+          "Volume",
+          "Receita",
+          "Data",
+        ];
+
+        const rows = enrichedOrders.map((order) => [
+          order.id,
+          order.userId,
+          order.clientCode,
+          order.product,
+          order.volume,
+          order.revenue,
+          new Date(order.createdAt).toLocaleDateString("pt-BR"),
+        ]);
+
+        const csv = [
+          headers.join(","),
+          ...rows.map((row) => row.map((cell) => `"${cell}"`).join(",")),
+        ].join("\n");
+
+        return {
+          csv,
+          fileName: `ordens-${input.year}-${String(input.month).padStart(2, "0")}.csv`,
+        };
+      } catch (error) {
+        if (error instanceof TRPCError) throw error;
+        console.error("Error exporting orders:", error);
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to export orders",
+        });
+      }
+    }),
+
   delete: protectedProcedure
     .input(z.object({ orderId: z.number() }))
     .mutation(async ({ ctx, input }) => {
       try {
-        // Verify ownership or admin status
         const userOrders = await getOrdersByUserId(ctx.user.id);
         const orderExists = userOrders.some((o) => o.id === input.orderId);
 
@@ -133,10 +206,7 @@ export const ordersRouter = router({
           });
         }
 
-        // Delete custom values first
         await deleteOrderCustomValues(input.orderId);
-        
-        // Delete order
         await deleteOrder(input.orderId);
 
         return { success: true };

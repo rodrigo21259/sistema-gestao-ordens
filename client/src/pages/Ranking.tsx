@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Loader2, Trophy, Medal, TrendingUp } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Loader2, Trophy, Medal, TrendingUp, Calendar } from "lucide-react";
 
 interface RankingEntry {
   userId: number;
@@ -14,10 +14,42 @@ interface RankingEntry {
 }
 
 export default function Ranking() {
-  const { data: rankingData, isLoading } = trpc.ranking.getRanking.useQuery();
+  const [selectedMonth, setSelectedMonth] = useState<string>("");
+  const [selectedYear, setSelectedYear] = useState<string>("");
   const [ranking, setRanking] = useState<RankingEntry[]>([]);
   const [currentUserPosition, setCurrentUserPosition] = useState<number | null>(null);
   const [currentUserScore, setCurrentUserScore] = useState<string>("0.00");
+
+  const { data: rankingData, isLoading } = trpc.ranking.getRanking.useQuery();
+
+  const currentYear = new Date().getFullYear();
+  const currentMonth = new Date().getMonth();
+
+  const months = [
+    { value: "0", label: "Janeiro" },
+    { value: "1", label: "Fevereiro" },
+    { value: "2", label: "Março" },
+    { value: "3", label: "Abril" },
+    { value: "4", label: "Maio" },
+    { value: "5", label: "Junho" },
+    { value: "6", label: "Julho" },
+    { value: "7", label: "Agosto" },
+    { value: "8", label: "Setembro" },
+    { value: "9", label: "Outubro" },
+    { value: "10", label: "Novembro" },
+    { value: "11", label: "Dezembro" },
+  ];
+
+  const years = Array.from({ length: 5 }, (_, i) => currentYear - i);
+
+  useEffect(() => {
+    if (!selectedMonth) {
+      setSelectedMonth(String(currentMonth));
+    }
+    if (!selectedYear) {
+      setSelectedYear(String(currentYear));
+    }
+  }, []);
 
   useEffect(() => {
     if (rankingData) {
@@ -76,15 +108,52 @@ export default function Ranking() {
 
       <Card className="border-primary/20 shadow-md">
         <CardHeader className="bg-gradient-to-r from-primary/5 to-accent/5 border-b">
-          <CardTitle className="flex items-center gap-2">
-            <Trophy className="h-5 w-5 text-primary" />
-            Ranking de Operadores
-          </CardTitle>
-          <CardDescription>Posições atualizadas em tempo real</CardDescription>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Calendar className="h-5 w-5 text-primary" />
+              <div>
+                <CardTitle>Ranking Mensal</CardTitle>
+                <CardDescription>Posições atualizadas em tempo real</CardDescription>
+              </div>
+            </div>
+          </div>
         </CardHeader>
-        <CardContent className="pt-6">
+        <CardContent className="pt-6 space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-semibold mb-2 block">Mês</label>
+              <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {months.map((month) => (
+                    <SelectItem key={month.value} value={month.value}>
+                      {month.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="text-sm font-semibold mb-2 block">Ano</label>
+              <Select value={selectedYear} onValueChange={setSelectedYear}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {years.map((year) => (
+                    <SelectItem key={year} value={String(year)}>
+                      {year}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
           <div className="space-y-3">
-            {ranking.map((entry, index) => (
+            {ranking.map((entry) => (
               <div
                 key={entry.userId}
                 className={`p-4 rounded-lg border transition-all ${getTopThreeClass(entry.position)}`}
