@@ -8,6 +8,7 @@ import Home from "./pages/Home";
 import OrderForm from "./pages/OrderForm";
 import Ranking from "./pages/Ranking";
 import AdminDashboard from "./pages/AdminDashboard";
+import AllOrdersManagement from "./pages/AllOrdersManagement";
 
 function Router() {
   return (
@@ -16,6 +17,7 @@ function Router() {
       <Route path={"/order-form"} component={OrderForm} />
       <Route path={"/ranking"} component={Ranking} />
       <Route path={"/admin"} component={AdminDashboard} />
+      <Route path={"/admin/orders"} component={AllOrdersManagement} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

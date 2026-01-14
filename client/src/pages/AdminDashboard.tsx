@@ -10,8 +10,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Loader2, Plus, Trash2, Users, Sliders, Grid3x3, Download, UserPlus } from "lucide-react";
+import { Loader2, Plus, Trash2, Users, Sliders, Grid3x3, Download, UserPlus, FileText } from "lucide-react";
+import { Link } from "wouter";
 import OrdersExport from "./OrdersExport";
+
 
 export default function AdminDashboard() {
   const { user } = useAuth();
@@ -167,7 +169,15 @@ export default function AdminDashboard() {
       <Header />
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
-          <h1 className="text-3xl font-bold text-primary mb-8">Painel Administrativo</h1>
+          <div className="flex items-center justify-between mb-8">
+            <h1 className="text-3xl font-bold text-primary">Painel Administrativo</h1>
+            <Link href="/admin/orders">
+              <Button className="flex items-center gap-2">
+                <FileText className="h-4 w-4" />
+                Gerenciar Ordens
+              </Button>
+            </Link>
+          </div>
 
           <Tabs defaultValue="users" className="space-y-6">
             <TabsList className="grid w-full grid-cols-4">

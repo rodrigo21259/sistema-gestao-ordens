@@ -92,3 +92,10 @@
 - [x] Implementar switcher de tema claro/escuro
 - [x] Extrair nome do email na criação de operador
 - [x] Testar todas as funcionalidades
+
+
+## Fase 13: Funcionalidade de Deletar Ordens
+- [x] Adicionar botão de deletar ordens na página OrderForm
+- [x] Adicionar seção de todas as ordens no painel admin
+- [x] Implementar permissões (operador deleta próprias, admin deleta qualquer uma)
+- [x] Testar funcionalidades
