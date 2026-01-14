@@ -84,3 +84,11 @@
 - [x] Ajustar tema escuro para cinza claro (não preto puro)
 - [x] Melhorar design visual geral
 - [x] Testar funcionalidades
+
+
+## Fase 12: Correções e Melhorias de UX
+- [x] Corrigir rotas e erros 404
+- [x] Adicionar botão home em todas as páginas
+- [x] Implementar switcher de tema claro/escuro
+- [x] Extrair nome do email na criação de operador
+- [x] Testar todas as funcionalidades
