@@ -59,3 +59,13 @@
 - [ ] Configurar variáveis de ambiente
 - [ ] Fazer checkpoint final
 - [ ] Entregar projeto ao usuário
+
+
+## Melhorias Solicitadas - Fase 9
+- [x] Simplificar página inicial de operadores (apenas Ordem e Ranking, sem Admin)
+- [x] Adicionar seletor de operador no formulário para admin registrar ordens em nome de outros
+- [x] Melhorar design visual com componentes mais sofisticados
+- [x] Atualizar nome do site para "Ranking de Distribuição"
+- [x] Adicionar informações sobre propriedade e controle de logins
+- [x] Melhorar layout e espaçamento visual
+- [x] Adicionar ícones e elementos visuais mais atraentes

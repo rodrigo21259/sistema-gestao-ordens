@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, Plus } from "lucide-react";
 
 interface CustomField {
   id: number;
@@ -20,9 +20,18 @@ interface CustomField {
   updatedAt?: Date;
 }
 
+interface User {
+  id: number;
+  name?: string | null;
+  email?: string | null;
+  role: string;
+}
+
 export default function OrderForm() {
   const { user } = useAuth();
   const [customFields, setCustomFields] = useState<CustomField[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
+  const [selectedUserId, setSelectedUserId] = useState<string>("");
   const [formData, setFormData] = useState({
     clientCode: "",
     product: "",
@@ -33,6 +42,9 @@ export default function OrderForm() {
   const [isLoading, setIsLoading] = useState(false);
 
   const { data: fields } = trpc.customFields.listActive.useQuery();
+  const { data: allUsers } = trpc.users.listAll.useQuery(undefined, {
+    enabled: user?.role === "admin",
+  });
   const createOrderMutation = trpc.orders.create.useMutation();
   const listOrdersMutation = trpc.orders.listByUser.useQuery();
 
@@ -41,6 +53,15 @@ export default function OrderForm() {
       setCustomFields(fields);
     }
   }, [fields]);
+
+  useEffect(() => {
+    if (allUsers && user?.role === "admin") {
+      setUsers(allUsers);
+      if (!selectedUserId && allUsers.length > 0) {
+        setSelectedUserId(String(user?.id));
+      }
+    }
+  }, [allUsers, user?.role, user?.id]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -137,16 +158,39 @@ export default function OrderForm() {
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Registrar Nova Ordem</CardTitle>
-          <CardDescription>Preencha os dados da ordem de venda</CardDescription>
+      <Card className="border-primary/20 shadow-md">
+        <CardHeader className="bg-gradient-to-r from-primary/5 to-accent/5 border-b">
+          <div className="flex items-center gap-2">
+            <Plus className="h-5 w-5 text-primary" />
+            <div>
+              <CardTitle>Registrar Nova Ordem</CardTitle>
+              <CardDescription>Preencha os dados da ordem de venda</CardDescription>
+            </div>
+          </div>
         </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+        <CardContent className="pt-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {user?.role === "admin" && users.length > 0 && (
+              <div>
+                <Label htmlFor="operador">Registrar para (Operador)</Label>
+                <Select value={selectedUserId} onValueChange={setSelectedUserId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione um operador" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {users.map((u) => (
+                      <SelectItem key={u.id} value={String(u.id)}>
+                        {u.name || u.email} {u.id === user?.id ? "(Você)" : ""}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="clientCode">Código do Cliente</Label>
+                <Label htmlFor="clientCode">Código do Cliente *</Label>
                 <Input
                   id="clientCode"
                   name="clientCode"
@@ -154,10 +198,11 @@ export default function OrderForm() {
                   value={formData.clientCode}
                   onChange={handleInputChange}
                   required
+                  className="mt-1"
                 />
               </div>
               <div>
-                <Label htmlFor="product">Produto</Label>
+                <Label htmlFor="product">Produto *</Label>
                 <Input
                   id="product"
                   name="product"
@@ -165,10 +210,11 @@ export default function OrderForm() {
                   value={formData.product}
                   onChange={handleInputChange}
                   required
+                  className="mt-1"
                 />
               </div>
               <div>
-                <Label htmlFor="volume">Volume</Label>
+                <Label htmlFor="volume">Volume *</Label>
                 <Input
                   id="volume"
                   name="volume"
@@ -178,10 +224,11 @@ export default function OrderForm() {
                   value={formData.volume}
                   onChange={handleInputChange}
                   required
+                  className="mt-1"
                 />
               </div>
               <div>
-                <Label htmlFor="revenue">Receita</Label>
+                <Label htmlFor="revenue">Receita (R$) *</Label>
                 <Input
                   id="revenue"
                   name="revenue"
@@ -191,13 +238,14 @@ export default function OrderForm() {
                   value={formData.revenue}
                   onChange={handleInputChange}
                   required
+                  className="mt-1"
                 />
               </div>
             </div>
 
             {customFields.length > 0 && (
               <div className="space-y-4 pt-4 border-t">
-                <h3 className="font-semibold">Campos Adicionais</h3>
+                <h3 className="font-semibold text-sm text-primary">Campos Adicionais</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {customFields.map((field) => (
                     <div key={field.id}>{renderCustomField(field)}</div>
@@ -206,7 +254,7 @@ export default function OrderForm() {
               </div>
             )}
 
-            <Button type="submit" disabled={isLoading} className="w-full">
+            <Button type="submit" disabled={isLoading} className="w-full h-10 text-base font-semibold">
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Registrar Ordem
             </Button>
@@ -214,36 +262,36 @@ export default function OrderForm() {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
+      <Card className="border-primary/20 shadow-md">
+        <CardHeader className="bg-gradient-to-r from-primary/5 to-accent/5 border-b">
           <CardTitle>Minhas Ordens</CardTitle>
           <CardDescription>Histórico de ordens registradas</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           {listOrdersMutation.isLoading ? (
             <div className="flex justify-center py-8">
-              <Loader2 className="h-6 w-6 animate-spin" />
+              <Loader2 className="h-6 w-6 animate-spin text-primary" />
             </div>
           ) : listOrdersMutation.data && listOrdersMutation.data.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b">
-                    <th className="text-left py-2">Cliente</th>
-                    <th className="text-left py-2">Produto</th>
-                    <th className="text-right py-2">Volume</th>
-                    <th className="text-right py-2">Receita</th>
-                    <th className="text-left py-2">Data</th>
+                  <tr className="border-b-2 border-primary/20">
+                    <th className="text-left py-3 px-2 font-semibold text-primary">Cliente</th>
+                    <th className="text-left py-3 px-2 font-semibold text-primary">Produto</th>
+                    <th className="text-right py-3 px-2 font-semibold text-primary">Volume</th>
+                    <th className="text-right py-3 px-2 font-semibold text-primary">Receita</th>
+                    <th className="text-left py-3 px-2 font-semibold text-primary">Data</th>
                   </tr>
                 </thead>
                 <tbody>
                   {listOrdersMutation.data.map((order) => (
-                    <tr key={order.id} className="border-b hover:bg-muted/50">
-                      <td className="py-2">{order.clientCode}</td>
-                      <td className="py-2">{order.product}</td>
-                      <td className="text-right py-2">{order.volume}</td>
-                      <td className="text-right py-2">R$ {parseFloat(order.revenue).toFixed(2)}</td>
-                      <td className="py-2">{new Date(order.createdAt).toLocaleDateString("pt-BR")}</td>
+                    <tr key={order.id} className="border-b hover:bg-primary/5 transition-colors">
+                      <td className="py-3 px-2">{order.clientCode}</td>
+                      <td className="py-3 px-2">{order.product}</td>
+                      <td className="text-right py-3 px-2">{order.volume}</td>
+                      <td className="text-right py-3 px-2 font-semibold">R$ {parseFloat(order.revenue).toFixed(2)}</td>
+                      <td className="py-3 px-2 text-muted-foreground">{new Date(order.createdAt).toLocaleDateString("pt-BR")}</td>
                     </tr>
                   ))}
                 </tbody>

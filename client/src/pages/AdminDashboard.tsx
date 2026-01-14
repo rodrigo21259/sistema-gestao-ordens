@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Loader2, Plus, Trash2, Edit2 } from "lucide-react";
+import { Loader2, Plus, Trash2, Users, Sliders, Grid3x3 } from "lucide-react";
 
 export default function AdminDashboard() {
   const { user } = useAuth();
@@ -32,9 +32,9 @@ export default function AdminDashboard() {
   if (user?.role !== "admin") {
     return (
       <div className="flex justify-center items-center min-h-screen">
-        <Card className="w-full max-w-md">
+        <Card className="w-full max-w-md border-destructive/20 bg-destructive/5">
           <CardContent className="pt-6">
-            <p className="text-center text-destructive">Acesso negado. Apenas administradores podem acessar esta página.</p>
+            <p className="text-center text-destructive font-semibold">Acesso negado. Apenas administradores podem acessar esta página.</p>
           </CardContent>
         </Card>
       </div>
@@ -117,34 +117,46 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Painel Administrativo</h1>
-        <p className="text-muted-foreground">Gerencie usuários, campos e métricas do sistema</p>
+      <div className="bg-gradient-to-r from-primary/10 to-accent/10 p-6 rounded-lg border border-primary/20">
+        <h1 className="text-3xl font-bold text-primary mb-2">Painel Administrativo</h1>
+        <p className="text-muted-foreground">Gerencie usuários, campos dinâmicos e métricas de ranking</p>
       </div>
 
       <Tabs defaultValue="users" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="users">Usuários</TabsTrigger>
-          <TabsTrigger value="fields">Campos Dinâmicos</TabsTrigger>
-          <TabsTrigger value="metrics">Métricas de Ranking</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-3 bg-muted p-1">
+          <TabsTrigger value="users" className="gap-2">
+            <Users className="h-4 w-4" />
+            <span className="hidden sm:inline">Usuários</span>
+          </TabsTrigger>
+          <TabsTrigger value="fields" className="gap-2">
+            <Grid3x3 className="h-4 w-4" />
+            <span className="hidden sm:inline">Campos</span>
+          </TabsTrigger>
+          <TabsTrigger value="metrics" className="gap-2">
+            <Sliders className="h-4 w-4" />
+            <span className="hidden sm:inline">Métricas</span>
+          </TabsTrigger>
         </TabsList>
 
         {/* Usuários */}
         <TabsContent value="users">
-          <Card>
-            <CardHeader>
-              <CardTitle>Gerenciamento de Usuários</CardTitle>
+          <Card className="border-primary/20 shadow-md">
+            <CardHeader className="bg-gradient-to-r from-primary/5 to-accent/5 border-b">
+              <CardTitle className="flex items-center gap-2">
+                <Users className="h-5 w-5 text-primary" />
+                Gerenciamento de Usuários
+              </CardTitle>
               <CardDescription>Visualize e gerencie os usuários do sistema</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-6">
               {!users ? (
                 <div className="flex justify-center py-8">
-                  <Loader2 className="h-6 w-6 animate-spin" />
+                  <Loader2 className="h-6 w-6 animate-spin text-primary" />
                 </div>
               ) : (
                 <div className="space-y-3">
                   {users.map((u) => (
-                    <div key={u.id} className="flex items-center justify-between p-4 border rounded-lg">
+                    <div key={u.id} className="flex items-center justify-between p-4 border rounded-lg hover:border-primary/50 transition-colors">
                       <div>
                         <p className="font-semibold">{u.name || u.email}</p>
                         <p className="text-sm text-muted-foreground">{u.email}</p>
@@ -162,6 +174,7 @@ export default function AdminDashboard() {
                             size="sm"
                             variant="outline"
                             onClick={() => handleDemoteUser(u.id)}
+                            className="text-xs"
                           >
                             Rebaixar
                           </Button>
@@ -170,6 +183,7 @@ export default function AdminDashboard() {
                           <Button
                             size="sm"
                             onClick={() => handlePromoteUser(u.id)}
+                            className="text-xs"
                           >
                             Promover
                           </Button>
@@ -185,12 +199,15 @@ export default function AdminDashboard() {
 
         {/* Campos Dinâmicos */}
         <TabsContent value="fields">
-          <Card>
-            <CardHeader>
-              <CardTitle>Campos Dinâmicos</CardTitle>
+          <Card className="border-primary/20 shadow-md">
+            <CardHeader className="bg-gradient-to-r from-primary/5 to-accent/5 border-b">
+              <CardTitle className="flex items-center gap-2">
+                <Grid3x3 className="h-5 w-5 text-primary" />
+                Campos Dinâmicos
+              </CardTitle>
               <CardDescription>Crie e gerencie campos personalizados no formulário de ordens</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="pt-6 space-y-6">
               <Dialog>
                 <DialogTrigger asChild>
                   <Button className="w-full">
@@ -211,19 +228,20 @@ export default function AdminDashboard() {
                         placeholder="Ex: Canal de Venda"
                         value={newFieldName}
                         onChange={(e) => setNewFieldName(e.target.value)}
+                        className="mt-1"
                       />
                     </div>
                     <div>
                       <Label htmlFor="fieldType">Tipo de Campo</Label>
                       <Select value={newFieldType} onValueChange={(value: any) => setNewFieldType(value)}>
-                        <SelectTrigger>
+                        <SelectTrigger className="mt-1">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="TEXT">Texto</SelectItem>
                           <SelectItem value="NUMBER">Número</SelectItem>
-                          <SelectItem value="BOOLEAN">Booleano</SelectItem>
-                          <SelectItem value="DROPDOWN">Dropdown</SelectItem>
+                          <SelectItem value="BOOLEAN">Booleano (Sim/Não)</SelectItem>
+                          <SelectItem value="DROPDOWN">Dropdown (Seleção)</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -235,6 +253,7 @@ export default function AdminDashboard() {
                           placeholder="Ex: Opção 1, Opção 2, Opção 3"
                           value={newFieldOptions}
                           onChange={(e) => setNewFieldOptions(e.target.value)}
+                          className="mt-1"
                         />
                       </div>
                     )}
@@ -248,12 +267,12 @@ export default function AdminDashboard() {
 
               {!customFields ? (
                 <div className="flex justify-center py-8">
-                  <Loader2 className="h-6 w-6 animate-spin" />
+                  <Loader2 className="h-6 w-6 animate-spin text-primary" />
                 </div>
               ) : (
                 <div className="space-y-3">
                   {customFields.map((field) => (
-                    <div key={field.id} className="flex items-center justify-between p-4 border rounded-lg">
+                    <div key={field.id} className="flex items-center justify-between p-4 border rounded-lg hover:border-primary/50 transition-colors">
                       <div>
                         <p className="font-semibold">{field.name}</p>
                         <p className="text-sm text-muted-foreground">{field.type}</p>
@@ -270,6 +289,7 @@ export default function AdminDashboard() {
                           size="sm"
                           variant="ghost"
                           onClick={() => handleDeleteField(field.id)}
+                          className="text-destructive hover:text-destructive hover:bg-destructive/10"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -284,23 +304,26 @@ export default function AdminDashboard() {
 
         {/* Métricas de Ranking */}
         <TabsContent value="metrics">
-          <Card>
-            <CardHeader>
-              <CardTitle>Métricas de Ranking</CardTitle>
+          <Card className="border-primary/20 shadow-md">
+            <CardHeader className="bg-gradient-to-r from-primary/5 to-accent/5 border-b">
+              <CardTitle className="flex items-center gap-2">
+                <Sliders className="h-5 w-5 text-primary" />
+                Métricas de Ranking
+              </CardTitle>
               <CardDescription>Configure os pesos das métricas que compõem o ranking</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-6">
               {!rankingMetrics ? (
                 <div className="flex justify-center py-8">
-                  <Loader2 className="h-6 w-6 animate-spin" />
+                  <Loader2 className="h-6 w-6 animate-spin text-primary" />
                 </div>
               ) : (
                 <div className="space-y-4">
                   {rankingMetrics.map((metric) => (
-                    <div key={metric.id} className="p-4 border rounded-lg space-y-3">
+                    <div key={metric.id} className="p-4 border rounded-lg hover:border-primary/50 transition-colors space-y-3">
                       <div className="flex items-center justify-between">
                         <p className="font-semibold capitalize">
-                          {metric.metricName === "revenue" ? "Receita" : "Quantidade de Ordens"}
+                          {metric.metricName === "revenue" ? "💰 Receita" : "📊 Quantidade de Ordens"}
                         </p>
                         <span className={`px-2 py-1 rounded text-xs font-medium ${
                           metric.isActive
@@ -322,7 +345,7 @@ export default function AdminDashboard() {
                           onBlur={(e) => handleUpdateMetric(metric.id, e.target.value)}
                           className="flex-1"
                         />
-                        <span className="text-sm text-muted-foreground">%</span>
+                        <span className="text-sm text-muted-foreground min-w-fit">%</span>
                       </div>
                     </div>
                   ))}
