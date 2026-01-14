@@ -219,24 +219,35 @@ export default function OrderForm() {
                   </div>
                   <div>
                     <Label htmlFor="product">Produto *</Label>
-                    <Input
-                      id="product"
-                      name="product"
-                      placeholder="Ex: Produto A"
+                    <Select
                       value={formData.product}
-                      onChange={handleInputChange}
-                      required
-                      className="mt-1"
-                    />
+                      onValueChange={(value) => setFormData((prev) => ({ ...prev, product: value }))}
+                    >
+                      <SelectTrigger className="mt-1">
+                        <SelectValue placeholder="Selecione o produto" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Renda Fixa">Renda Fixa</SelectItem>
+                        <SelectItem value="Renda Variável">Renda Variável</SelectItem>
+                        <SelectItem value="Fundos">Fundos</SelectItem>
+                        <SelectItem value="Alternativos">Alternativos</SelectItem>
+                        <SelectItem value="Prev">Prev</SelectItem>
+                        <SelectItem value="COE">COE</SelectItem>
+                        <SelectItem value="Internacional">Internacional</SelectItem>
+                        <SelectItem value="MB">MB</SelectItem>
+                        <SelectItem value="Iris">Iris</SelectItem>
+                        <SelectItem value="Outros">Outros</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div>
-                    <Label htmlFor="volume">Volume *</Label>
+                    <Label htmlFor="volume">Volume (R$) *</Label>
                     <Input
                       id="volume"
                       name="volume"
                       type="number"
-                      step="0.0001"
-                      placeholder="Ex: 100.5"
+                      step="0.01"
+                      placeholder="Ex: 1500.00"
                       value={formData.volume}
                       onChange={handleInputChange}
                       required
