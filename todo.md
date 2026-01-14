@@ -99,3 +99,10 @@
 - [x] Adicionar seção de todas as ordens no painel admin
 - [x] Implementar permissões (operador deleta próprias, admin deleta qualquer uma)
 - [x] Testar funcionalidades
+
+
+## Fase 14: Ajustes Finais de Negócio
+- [x] Filtrar admins do ranking (apenas operadores aparecem)
+- [x] Atualizar labels de Volume e Receita para R$
+- [x] Validar email @investsmart.com.br ao criar operador
+- [x] Testar funcionalidades

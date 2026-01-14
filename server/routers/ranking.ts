@@ -70,9 +70,12 @@ export const rankingRouter = router({
       const users = await getAllUsers();
       const orders = await getAllOrders();
 
-      // Calculate scores for each user
+      // Filter only operators (exclude admins)
+      const operators = users.filter((user) => user.role === "user");
+
+      // Calculate scores for each operator
       const rankings = await Promise.all(
-        users.map(async (user) => {
+        operators.map(async (user) => {
           const userOrders = orders.filter((o) => o.userId === user.id);
           
           // Calculate metrics
