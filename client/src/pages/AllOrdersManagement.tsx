@@ -9,6 +9,17 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Loader2, Trash2, Search } from "lucide-react";
 
+// Formatar valor monetário no padrão brasileiro (R$ 1.234.567,89)
+const formatCurrency = (value: number | string): string => {
+  const numValue = typeof value === "string" ? parseFloat(value) : value;
+  return numValue.toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+};
+
 export default function AllOrdersManagement() {
   const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
@@ -116,8 +127,8 @@ export default function AllOrdersManagement() {
                           <td className="py-3 px-2 font-medium">{order.userName}</td>
                           <td className="py-3 px-2">{order.clientCode}</td>
                           <td className="py-3 px-2">{order.product}</td>
-                          <td className="text-right py-3 px-2">{parseFloat(order.volume).toFixed(4)}</td>
-                          <td className="text-right py-3 px-2 font-semibold">R$ {parseFloat(order.revenue).toFixed(2)}</td>
+                          <td className="text-right py-3 px-2">{formatCurrency(order.volume)}</td>
+                          <td className="text-right py-3 px-2 font-semibold">{formatCurrency(order.revenue)}</td>
                           <td className="py-3 px-2 text-muted-foreground">
                             {new Date(order.createdAt).toLocaleDateString("pt-BR")}
                           </td>

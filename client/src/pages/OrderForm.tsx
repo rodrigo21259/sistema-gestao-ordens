@@ -28,6 +28,17 @@ interface User {
   role: string;
 }
 
+// Formatar valor monetário no padrão brasileiro (R$ 1.234.567,89)
+const formatCurrency = (value: number | string): string => {
+  const numValue = typeof value === "string" ? parseFloat(value) : value;
+  return numValue.toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+};
+
 export default function OrderForm() {
   const { user } = useAuth();
   const [customFields, setCustomFields] = useState<CustomField[]>([]);
@@ -310,7 +321,7 @@ export default function OrderForm() {
                       <div className="flex-1">
                         <p className="font-semibold">{order.product}</p>
                         <p className="text-sm text-muted-foreground">
-                          Cliente: {order.clientCode} | Volume: {order.volume} | Receita: R$ {parseFloat(order.revenue).toFixed(2)}
+                          Cliente: {order.clientCode} | Volume: {formatCurrency(order.volume)} | Receita: {formatCurrency(order.revenue)}
                         </p>
                         <p className="text-xs text-muted-foreground mt-1">
                           {new Date(order.createdAt).toLocaleDateString("pt-BR")} às{" "}

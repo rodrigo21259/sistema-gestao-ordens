@@ -15,6 +15,17 @@ interface RankingEntry {
   position: number;
 }
 
+// Formatar valor monetário no padrão brasileiro (R$ 1.234.567,89)
+const formatCurrency = (value: number | string): string => {
+  const numValue = typeof value === "string" ? parseFloat(value) : value;
+  return numValue.toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+};
+
 export default function Ranking() {
   const { user } = useAuth();
   const [selectedMonth, setSelectedMonth] = useState<string>("");
@@ -176,7 +187,7 @@ export default function Ranking() {
                           <div className="space-y-2 text-sm">
                             <div className="flex justify-between">
                               <span className="text-muted-foreground">Receita:</span>
-                              <span className="font-semibold">R$ {parseFloat(entry.totalRevenue).toFixed(2)}</span>
+                              <span className="font-semibold">{formatCurrency(entry.totalRevenue)}</span>
                             </div>
                             <div className="flex justify-between">
                               <span className="text-muted-foreground">Ordens:</span>
@@ -256,7 +267,7 @@ export default function Ranking() {
                                 {entry.userName}
                                 {entry.userId === user?.id && <span className="text-primary ml-2">(Você)</span>}
                               </td>
-                              <td className="text-right py-3 px-2">R$ {parseFloat(entry.totalRevenue).toFixed(2)}</td>
+                              <td className="text-right py-3 px-2">{formatCurrency(entry.totalRevenue)}</td>
                               <td className="text-right py-3 px-2">{entry.orderCount}</td>
                               <td className="text-right py-3 px-2 font-bold text-accent">
                                 {parseFloat(entry.score).toFixed(2)}
